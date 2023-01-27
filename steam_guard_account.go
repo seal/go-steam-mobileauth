@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http/cookiejar"
 	"net/url"
 	"regexp"
@@ -128,10 +127,6 @@ func (a *SteamGuardAccount) FetchConfirmations() ([]*Confirmation, error) {
 	}
 
 	respString := string(respBody)
-	err = ioutil.WriteFile("resp.html", respBody, 0644)
-	if err != nil {
-		return nil, err
-	}
 
 	// Nothing to confirm
 	if strings.Contains(respString, "<div>Nothing to confirm</div>") {
