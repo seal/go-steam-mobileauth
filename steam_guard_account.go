@@ -156,7 +156,7 @@ func (a *SteamGuardAccount) FetchConfirmations() ([]*Confirmation, error) {
 
 	// Create confirmations slice
 	var confirmations []*Confirmation
-	for index, _ := range confIDs {
+	for index := range confIDs {
 		cn := &Confirmation{
 			ConfirmationID:  confIDs[index][1],
 			ConfirmationKey: confKeys[index][1],
