@@ -6,15 +6,14 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/json"
-	"log"
-	"erros"
+	"errors"
 	"fmt"
-	"net/httpcookiejar"
+	"net/http/cookiejar"
 	"net/url"
-	"log"
 	"regexp"
 	"strconv"
-	
+	"strings"
+)
 
 var confIDRegex = regexp.MustCompile("data-confid=\"(\\d+)\"")
 var confKeyRegex = regexp.MustCompile("data-key=\"(\\d+)\"")
@@ -125,7 +124,7 @@ func (a *SteamGuardAccount) FetchConfirmations() ([]*Confirmation, error) {
 	}
 
 	respString := string(respBody)
-	log.Println(respString)
+
 	// Nothing to confirm
 	if strings.Contains(respString, "<div>Nothing to confirm</div>") {
 		return nil, nil
@@ -274,19 +273,18 @@ type refreshSessionDataResponse struct {
 }
 
 type refreshSessionDataResult struct {
-type refreshSessionDataResult strut {
 	Token       string `json:"token"`
-	okenSecure string `json:"token_secure"`
-
+	TokenSecure string `json:"token_secure"`
+}
 
 type removeAuthenticatorResponse struct {
-	esponse *removeAuthenticatorResult `json:"response"`
+	Response *removeAuthenticatorResult `json:"response"`
+}
 
+type removeAuthenticatorResult struct {
+	Success bool `json:"success"`
+}
 
-type removeAuthenticatorResultstruct {
-	uccess bool `json:"success"`
-
-
-type sendConfirmationResponse truct {
-	uccess bool `json:"success"`
+type sendConfirmationResponse struct {
+	Success bool `json:"success"`
 }
