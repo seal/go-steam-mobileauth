@@ -1,7 +1,7 @@
 package mobileauth
 
 type Confirmation struct {
-	ConfirmationID          string
-	ConfirmationKey         string
-	ConfirmationDescription string
+	ConfirmationID  string
+	ConfirmationKey string
+	Creator         string
 }

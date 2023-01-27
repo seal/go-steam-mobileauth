@@ -6,19 +6,22 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/json"
-	"log"
-	"erros"
+	"errors"
 	"fmt"
-	"net/httpcookiejar"
+	"io/ioutil"
+	"net/http/cookiejar"
 	"net/url"
-	"log"
 	"regexp"
 	"strconv"
-	
+	"strings"
+)
 
 var confIDRegex = regexp.MustCompile("data-confid=\"(\\d+)\"")
 var confKeyRegex = regexp.MustCompile("data-key=\"(\\d+)\"")
-var confDescRegex = regexp.MustCompile("<div>((Confirm|Trade with|Sell -) .+)</div>")
+var creatorKeyRegex = regexp.MustCompile("data-creator=\"(\\d+)\"")
+
+//var confDescRegex = regexp.MustCompile("<div>((Confirm|Trade with|Sell -) .+)</div>")
+// Removed, get from another lib
 
 type SteamGuardAccount struct {
 	SharedSecret   string `json:"shared_secret"`
@@ -125,7 +128,11 @@ func (a *SteamGuardAccount) FetchConfirmations() ([]*Confirmation, error) {
 	}
 
 	respString := string(respBody)
-	log.Println(respString)
+	err = ioutil.WriteFile("resp.html", respBody, 0644)
+	if err != nil {
+		return nil, err
+	}
+
 	// Nothing to confirm
 	if strings.Contains(respString, "<div>Nothing to confirm</div>") {
 		return nil, nil
@@ -137,13 +144,13 @@ func (a *SteamGuardAccount) FetchConfirmations() ([]*Confirmation, error) {
 	// Try to parse response
 	confIDs := confIDRegex.FindAllStringSubmatch(respString, -1)
 	confKeys := confKeyRegex.FindAllStringSubmatch(respString, -1)
-	confDescs := confDescRegex.FindAllStringSubmatch(respString, -1)
+	creatorKeys := creatorKeyRegex.FindAllStringSubmatch(respString, -1)
 
-	if confIDs == nil || confKeys == nil || confDescs == nil {
+	if confIDs == nil || confKeys == nil || creatorKeys == nil {
 		return nil, errors.New("failed to parse response")
 	}
 
-	if len(confIDs) != len(confKeys) || len(confIDs) != len(confDescs) {
+	if len(confIDs) != len(confKeys) || len(confIDs) != len(creatorKeys) {
 		return nil, errors.New("unexpected response format: number of ids, keys and descriptions are not the same")
 	}
 
@@ -151,9 +158,9 @@ func (a *SteamGuardAccount) FetchConfirmations() ([]*Confirmation, error) {
 	var confirmations []*Confirmation
 	for index, _ := range confIDs {
 		cn := &Confirmation{
-			ConfirmationID:          confIDs[index][1],
-			ConfirmationKey:         confKeys[index][1],
-			ConfirmationDescription: confDescs[index][1],
+			ConfirmationID:  confIDs[index][1],
+			ConfirmationKey: confKeys[index][1],
+			Creator:         creatorKeys[index][1],
 		}
 		confirmations = append(confirmations, cn)
 	}
@@ -274,19 +281,18 @@ type refreshSessionDataResponse struct {
 }
 
 type refreshSessionDataResult struct {
-type refreshSessionDataResult strut {
 	Token       string `json:"token"`
-	okenSecure string `json:"token_secure"`
-
+	TokenSecure string `json:"token_secure"`
+}
 
 type removeAuthenticatorResponse struct {
-	esponse *removeAuthenticatorResult `json:"response"`
+	Response *removeAuthenticatorResult `json:"response"`
+}
 
+type removeAuthenticatorResult struct {
+	Success bool `json:"success"`
+}
 
-type removeAuthenticatorResultstruct {
-	uccess bool `json:"success"`
-
-
-type sendConfirmationResponse truct {
-	uccess bool `json:"success"`
+type sendConfirmationResponse struct {
+	Success bool `json:"success"`
 }
