@@ -136,23 +136,25 @@ func (a *SteamGuardAccount) FetchConfirmations() ([]*Confirmation, error) {
 	// Try to parse response
 	confIDs := confIDRegex.FindAllStringSubmatch(respString, -1)
 	confKeys := confKeyRegex.FindAllStringSubmatch(respString, -1)
-	confDescs := confDescRegex.FindAllStringSubmatch(respString, -1)
+	//confDescs := confDescRegex.FindAllStringSubmatch(respString, -1)
 
-	if confIDs == nil || confKeys == nil || confDescs == nil {
+	if confIDs == nil || confKeys == nil {
+		//if confIDs == nil || confKeys == nil || confDescs == nil {
 		return nil, errors.New("failed to parse response")
 	}
 
-	if len(confIDs) != len(confKeys) || len(confIDs) != len(confDescs) {
+	//if len(confIDs) != len(confKeys) || len(confIDs) != len(confDescs) {
+	if len(confIDs) != len(confKeys) {
 		return nil, errors.New("unexpected response format: number of ids, keys and descriptions are not the same")
 	}
 
 	// Create confirmations slice
 	var confirmations []*Confirmation
-	for index, _ := range confIDs {
+	for index := range confIDs {
 		cn := &Confirmation{
-			ConfirmationID:          confIDs[index][1],
-			ConfirmationKey:         confKeys[index][1],
-			ConfirmationDescription: confDescs[index][1],
+			ConfirmationID:  confIDs[index][1],
+			ConfirmationKey: confKeys[index][1],
+			//ConfirmationDescription: confDescs[index][1],
 		}
 		confirmations = append(confirmations, cn)
 	}
